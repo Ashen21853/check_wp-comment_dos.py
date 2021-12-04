@@ -40,13 +40,13 @@ import sys
 ##########################################################################################
 
 # RETURN VALUE
-STATE_OK=0
-STATE_WARNING=1
-STATE_CRITICAL=2
-STATE_UNKNOW=3
+STATE_OK        =   0
+STATE_WARNING   =   1
+STATE_CRITICAL  =   2
+STATE_UNKNOW    =   3
 
 # DESCRIPTION USED TO GENERATE HELP
-DESC="This Script is used with the database used by Wordpress. It will check if a given number of commentary in a given lapse of time has been posted."
+DESC            =   "This Script is used with the database used by Wordpress. It will check if a given number of commentary in a given lapse of time has been posted."
 
 
 
@@ -60,7 +60,7 @@ DESC="This Script is used with the database used by Wordpress. It will check if 
 #       prefix      :   Prefix used in the database by Wordpress (definded at the Wordpress installation)
 #       n           :   the number of commentaries to check
 #
-def build_request (prefix, n) :
+def build_request ( prefix, n ) :
     return "SELECT " +prefix+ "_comments.comment_date FROM " +prefix+ "_comments ORDER BY " +prefix+ "_comments.comment_date DESC LIMIT " +n+ ";"
 
 
@@ -71,10 +71,10 @@ def build_request (prefix, n) :
 #       msg         :   Error message to display
 #       argParser   :   Object needed to display help
 #
-def fatal (msg, argParser) :
-    print ("\n[!] FATAL ERROR :", msg, "\n\n")
-    argParser.print_help()
-    return_state( STATE_CRITICAL )
+def fatal ( msg, argParser ) :
+    print ( "\n[!] FATAL ERROR :", msg, "\n\n" )
+    argParser.print_help ()
+    return_state ( STATE_CRITICAL )
 
 
 
@@ -87,13 +87,13 @@ def fatal (msg, argParser) :
 #       nb          :   The number of commentaries to check
 #       time        :   The time in seconds to check the older commentaries
 #
-def check_db (cursor, prefix, nb, time) :
-    cursor.execute (build_request(prefix, nb))
-    result = cursor.fetchall()
+def check_db ( cursor, prefix, nb, time ) :
+    cursor.execute ( build_request ( prefix, nb ) )
+    result = cursor.fetchall ()
     
     d = result[-1]
     d = datetime.datetime.today() - d[0]
-    b = datetime.timedelta(seconds = time)
+    b = datetime.timedelta ( seconds = time )
     if d < b :
         return True
     return False
@@ -106,19 +106,19 @@ def check_db (cursor, prefix, nb, time) :
 #       state       :   The state to return
 #       msg         :   A message to print after the status
 #
-def return_state ( state, msg = "") :
+def return_state ( state, msg = "" ) :
     if state == STATE_OK :
-        print("OK", msg)
+        print ( "OK", msg )
         sys.exit(STATE_OK)
     elif state == STATE_WARNING :
-        print("WARNING", msg)
-        sys.exit(STATE_WARNING)
+        print ( "WARNING", msg )
+        sys.exit ( STATE_WARNING )
     elif state == STATE_CRITICAL :
-        print("CRITICAL", msg)
-        sys.exit(STATE_CRITICAL)
+        print ( "CRITICAL", msg )
+        sys.exit ( STATE_CRITICAL )
     else :
-        print("UNKNOW", msg)
-        sys.exit(STATE_UNKNOW)
+        print ( "UNKNOW", msg )
+        sys.exit ( STATE_UNKNOW )
     
 
 
@@ -131,25 +131,26 @@ def return_state ( state, msg = "") :
 ################      Argument Gestion
 parser = argparse.ArgumentParser(description=DESC)
 # Register all arguments
-parser.add_argument('IP', help='IP address or FQDN of the database')
-parser.add_argument("WARN", help='<nb>,<time> : NB = number of commentary, TIME = timelapse in seconds')
-parser.add_argument('CRIT', help='<nb>,<time> : NB = number of commentary, TIME = timelapse in seconds')
-parser.add_argument('USER', help="username used to connect to the database")
-parser.add_argument('PASS', help="password used to connect to the database")
-parser.add_argument('DATABASE', help="the name of the database")
-parser.add_argument('PREFIX', help="the prefix used by the database")
+parser.add_argument ( 'IP', help='IP address or FQDN of the database')
+parser.add_argument ( "WARN", help='<nb>,<time> : NB = number of commentary, TIME = timelapse in seconds' )
+parser.add_argument ( 'CRIT', help='<nb>,<time> : NB = number of commentary, TIME = timelapse in seconds' )
+parser.add_argument ( 'USER', help="username used to connect to the database" )
+parser.add_argument ( 'PASS', help="password used to connect to the database" )
+parser.add_argument ( 'DATABASE', help="the name of the database" )
+parser.add_argument ( 'PREFIX', help="the prefix used by the database" )
 
-args = parser.parse_args()
+args = parser.parse_args ()
 
 # Separate couple nb,time in two variables. Exit with error if cannot split
 try :
-    warn=args.WARN.split(",")
-    warn_n=warn[0]
-    warn_t=int(warn[1])
+    warn =      args.WARN.split ( "," )
+    warn_n =    warn[0]
+    warn_t =    int ( warn[1] )
 
-    crit=args.CRIT.split(",")
-    crit_n=crit[0]
-    crit_t=int(crit[1])
+    crit =      args.CRIT.split ( "," )
+    crit_n =    crit[0]
+    crit_t =    int ( crit[1] )
+
 except IndexError :
     fatal("Bad arguments", parser)
 except :
@@ -163,21 +164,24 @@ except :
 try :
 
     # Connect to the database and set cursor
-    db = mysql.connector.connect(host = args.IP, user = args.USER, password = args.PASS, database = args.DATABASE)
-    cursor = db.cursor()
+    db =    mysql.connector.connect (   host = args.IP,                     \
+                                        user = args.USER,                   \
+                                        password = args.PASS,               \
+                                        database = args.DATABASE )
+    cursor = db.cursor ()
 
     # Check Warning state
-    if check_db(cursor, args.PREFIX, crit_n, crit_t) :
-        return_state(STATE_WARNING)
+    if check_db ( cursor, args.PREFIX, crit_n, crit_t ) :
+        return_state ( STATE_WARNING )
 
     # Check Critical state
-    if check_db(cursor, args.PREFIX, warn_n, warn_t) :
-        return_state(STATE_WARNING)
+    if check_db ( cursor, args.PREFIX, warn_n, warn_t ) :
+        return_state ( STATE_WARNING )
 
 except Exception as x:
-    fatal(x, parser)
+    fatal ( x, parser )
 ##################    End SQL Connection
 
 
 # if all check is return 0, and they are no exception, return STATE_OK
-return_state( STATE_OK )
+return_state ( STATE_OK )
