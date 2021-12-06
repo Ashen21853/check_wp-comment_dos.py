@@ -91,10 +91,10 @@ def check_db ( cursor, prefix, nb, time ) :
     cursor.execute ( build_request ( prefix, nb ) )
     result = cursor.fetchall ()
     
-    d = result[-1]
-    d = datetime.datetime.today() - d[0]
-    b = datetime.timedelta ( seconds = time )
-    if d < b :
+    delta1 = result[-1]
+    delta1 = datetime.datetime.today() - d[0]
+    delta2 = datetime.timedelta ( seconds = time )
+    if delta1 < delta2 :
         return True
     return False
 
@@ -129,7 +129,7 @@ def return_state ( state, msg = "" ) :
 ################################################################################################
 
 ################      Argument Gestion
-parser = argparse.ArgumentParser(description=DESC)
+parser = argparse.ArgumentParser ( description = DESC )
 # Register all arguments
 parser.add_argument ( 'IP', help='IP address or FQDN of the database')
 parser.add_argument ( "WARN", help='<nb>,<time> : NB = number of commentary, TIME = timelapse in seconds' )
@@ -152,9 +152,9 @@ try :
     crit_t =    int ( crit[1] )
 
 except IndexError :
-    fatal("Bad arguments", parser)
+    fatal ( "Bad arguments", parser )
 except :
-    fatal("", parser)
+    fatal ( "", parser )
 
 ###################    End Arguments Gestion
 
