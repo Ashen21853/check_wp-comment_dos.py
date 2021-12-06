@@ -92,7 +92,7 @@ def check_db ( cursor, prefix, nb, time ) :
     result = cursor.fetchall ()
     
     delta1 = result[-1]
-    delta1 = datetime.datetime.today() - d[0]
+    delta1 = datetime.datetime.today() - delta1[0]
     delta2 = datetime.timedelta ( seconds = time )
     if delta1 < delta2 :
         return True
